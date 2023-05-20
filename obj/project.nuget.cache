@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "qDYSyhl6VOqM63YVy8ORjI6Mbh2AhVPEXM76WFIPRrZxmEiag3cL13ABNm9QRG2DJW3iGLuYraf6JsV8hJ8AOQ==",
+  "dgSpecHash": "Q5QilBTBX/jiqQEqkivGrsl82iqAT4xSPBDzxBkVzYEQsd05TaRh+1nSiy7Fl8aBHYeSVs09kntU6DI/NHiHHA==",
   "success": true,
   "projectFilePath": "G:\\My Drive\\Knowledge\\MVC-ProjectDemo\\StudentPortal\\StudentPortal\\StudentPortal.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\sujin\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
-    "C:\\Users\\sujin\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }

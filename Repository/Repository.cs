@@ -1,43 +1,89 @@
 ﻿using StudentPortal.Repository.IRepository;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace StudentPortal.Repository
 {
+    /// <summary>
+    /// Base repository class which is implementing IRepository interface.
+    /// </summary>
+    /// <typeparam name="T">Model class type.</typeparam>
     public class Repository<T> : IRepository<T> where T : class
     {
-        public List<T> DataSet { set; get; }
-       
-        public Task<List<T>> GetAllAsync(int pageSize, int pageNumber)
+        private static List<T> DataSet { set; get; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Repository() 
         {
-            return GetPageResult(DataSet, pageSize, pageNumber);
+            DataSet = new List<T>();
         }
 
-        public Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate, int pageSize, int pageNumber)
+        /// <summary>
+        /// Method for getting the model objects satisfying the input query parameters.
+        /// </summary>
+        /// <param name="pageSize">The number of rows in a single page.</param>
+        /// <param name="pageNumber">The current page number to be displayed.</param>
+        /// <param name="searchpredicate">The search query.</param>
+        /// <param name="sortpredicate">The sort query.</param>
+        /// <param name="pageCount">The number of pages returned after query execution.</param>
+        /// <returns>The list of model objects.</returns>
+        public Task<List<T>> GetAsync(int pageSize,
+                                      int pageNumber,
+                                      Expression<Func<T, bool>> searchpredicate,
+                                      Expression<Func<T, object>> sortpredicate,
+                                      out int pageCount)
         {
-            if(predicate != null)
+            try
             {
                 IQueryable<T> query = DataSet.AsQueryable();
-                var searchResult = query.Where(predicate).ToList(); // Check what happens if the result is null
-                return GetPageResult(searchResult, pageSize, pageNumber);
+
+                if (searchpredicate != null)
+                {
+                    query = query.Where(searchpredicate);
+                }
+
+                if (sortpredicate != null)
+                {
+                    query = query.OrderBy(sortpredicate);
+                }
+
+
+                var totalCount = query.Count();
+                pageCount = (int)Math.Ceiling((decimal)(totalCount) / Convert.ToDecimal(pageSize));
+
+                var searchResults = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+                return Task.FromResult(searchResults);
             }
-            return GetPageResult(DataSet, pageSize, pageNumber); // If predicate is null we can return the objects
+            catch (Exception ex)
+            {
+                pageCount = 0;
+                throw new Exception("An error occurred while retrieving data.", ex);
+            }
         }
 
-        private Task<List<T>> GetPageResult(List<T> dataSet, int pageSize, int pageNumber)
+        /// <summary>
+        /// Method for adding data to datasource.
+        /// </summary>
+        /// <param name="model">Model type.</param>
+        /// <returns>Task status.</returns>
+        public Task CreateAsync(T model)
         {
-            if(dataSet == null)
+            try
             {
-                return Task.FromException<List<T>>(
-                    new ArgumentNullException(nameof(dataSet), "dataSet is null for pagination"));
+                if (model != null)
+                {
+                    DataSet.Add(model);
+                    return Task.CompletedTask;
+                }
+                return Task.FromException<ArgumentNullException>(new ArgumentNullException(nameof(model)));
+
             }
-            if(dataSet.Count > pageSize)
+            catch(Exception ex) 
             {
-                int totalCount = dataSet.Count;
-                int numberOfPages = (int)Math.Ceiling((double)totalCount / pageSize);
-                dataSet.Skip(pageNumber * pageSize).Take(pageSize);
-                return Task.FromResult(dataSet);
-            }
-            return Task.FromResult(dataSet);
+                throw new Exception("An error occurred while retrieving data.", ex);
+            }        
         }
     }
 }

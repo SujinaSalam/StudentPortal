@@ -1,5 +1,10 @@
-﻿namespace StudentPortal.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StudentPortal.Models
 {
+    /// <summary>
+    /// Class for holding the student details.
+    /// </summary>
     public class Student
     {
         public int Id { get; set; }
