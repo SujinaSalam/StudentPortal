@@ -34,7 +34,10 @@ namespace StudentPortal.Service
                 Expression<Func<Student, object>> sortExp = (s) => s.EnrolledDate;
                 int totalPages = 0;
                 var studentlist = _studentRepository.GetAsync(_pageSize,
-                     studentViewModel.CurrentPageIndex, queryExp, sortExp, out totalPages);
+                                                              studentViewModel.CurrentPageIndex,
+                                                              queryExp,
+                                                              sortExp,
+                                                              out totalPages);
 
                 studentViewModel.Students = studentlist.Result;
                 studentViewModel.TotalPages = totalPages;
@@ -78,10 +81,17 @@ namespace StudentPortal.Service
             try
             {
                 Expression<Func<Student, bool>> query = (s) =>
-                 (!string.IsNullOrEmpty(studentViewModel.SearchName) ? s.FirstName.Contains(studentViewModel.SearchName, StringComparison.CurrentCultureIgnoreCase) : true) ||
-                 (!string.IsNullOrEmpty(studentViewModel.SearchName) ? s.LastName.Contains(studentViewModel.SearchName, StringComparison.CurrentCultureIgnoreCase) : true)
-                && (studentViewModel.SearchStartDate.HasValue ? (s.EnrolledDate >= studentViewModel.SearchStartDate && s.EnrolledDate <= studentViewModel.SearchEndDate) : true);
+                 ((!string.IsNullOrEmpty(studentViewModel.SearchName) ? s.FirstName.StartsWith(studentViewModel.SearchName, StringComparison.CurrentCultureIgnoreCase) : true) ||
+                 (!string.IsNullOrEmpty(studentViewModel.SearchName) ? s.LastName.StartsWith(studentViewModel.SearchName, StringComparison.CurrentCultureIgnoreCase) : true))
+                &&
+                ((studentViewModel.SearchStartDate.HasValue && studentViewModel.SearchEndDate.HasValue) ?
+                (s.EnrolledDate >= studentViewModel.SearchStartDate && s.EnrolledDate <= studentViewModel.SearchEndDate) :
+                (studentViewModel.SearchStartDate.HasValue ? (s.EnrolledDate >= studentViewModel.SearchStartDate) : true));
                 return query;
+                //Expression<Func<Student, bool>> query = (s) =>
+                //((studentViewModel.SearchStartDate.HasValue && studentViewModel.SearchEndDate.HasValue) ?
+                //    (s.EnrolledDate >= studentViewModel.SearchStartDate && s.EnrolledDate <= studentViewModel.SearchEndDate) :
+                //    (studentViewModel.SearchStartDate.HasValue ? (s.EnrolledDate >= studentViewModel.SearchStartDate) : true));
             }
             catch (Exception ex)
             {
@@ -104,6 +114,7 @@ namespace StudentPortal.Service
                     CreateStudent(new StudentViewModel() { Student = new Student { Id = i + 4, FirstName = "John" + i, LastName = "Mathew", Age = 20, EnrolledDate = new DateTime(2018, 3, 01) } });
                     CreateStudent(new StudentViewModel() { Student = new Student { Id = i + 5, FirstName = "Cris" + i, LastName = "Colman", Age = 30, EnrolledDate = new DateTime(2018, 2, 27) } });
                     CreateStudent(new StudentViewModel() { Student = new Student { Id = i + 6, FirstName = "David" + i, LastName = "Maginnis", Age = 28, EnrolledDate = new DateTime(2018, 1, 31) } });
+                    CreateStudent(new StudentViewModel() { Student = new Student { Id = i + 6, FirstName = "Da" + i, LastName = "Maginnis", Age = 28, EnrolledDate = new DateTime(2018, 1, 31) } });
                 }
             }
             catch (Exception ex) 

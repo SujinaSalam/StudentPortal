@@ -35,10 +35,13 @@ namespace StudentPortal.Controllers
         {
             try
             {
-                var viewmodel = _studentService.GetStudents(viewModel);
-                return View(viewmodel.Result);
-                //var viewmodel = _studentService.GetStudents(viewModel);
-                //return PartialView("_Students", viewmodel.Result);
+                if (ModelState.IsValid)
+                {
+                    var viewmodel = _studentService.GetStudents(viewModel);
+                    return View(viewmodel.Result);
+                }
+
+                return View();
             }
             catch(Exception ex) 
             {
@@ -52,12 +55,18 @@ namespace StudentPortal.Controllers
         /// </summary>
         /// <param name="viewModel">View model object to bind between the view and the model.</param>
         /// <returns>The list of students.</returns>
-        public IActionResult _Students(StudentViewModel viewModel)
+        [HttpPost]
+        public ActionResult GetSearchResults(StudentViewModel viewModel)
         {
             try
             {
-                var viewmodel = _studentService.GetStudents(viewModel);
-                return View(viewmodel.Result);
+                if (ModelState.IsValid)
+                {
+                    var viewmodel = _studentService.GetStudents(viewModel);
+                    return PartialView("_Students", viewmodel.Result.Students);
+                }
+
+                return PartialView("_Students");
             }
             catch (Exception ex)
             {

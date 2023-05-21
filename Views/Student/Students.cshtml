@@ -1,75 +1,132 @@
-﻿@model StudentPortal.ViewModel.StudentViewModel
+﻿@using System.Globalization;
+@model StudentPortal.ViewModel.StudentViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<!-- Search form -->
-<!-- Search form -->
-<form method="get" action="@Url.Action("Students", "Student")">
-    <div>
-        <label for="searchName">Name:</label>
-        <input type="text" id="searchName" name="SearchName" value="@Model.SearchName" />
+
+<div id="studentTableRow"></div>
+<div class="col-md-9" >
+
+    <!-- Search form -->
+    <div id="searchContainer ">
+        <form method="post" action="@Url.Action("GetSearchResults", "Student")">
+            <div >
+                <label for="searchName">Name:</label>
+                <input type="text" id="searchName" name="SearchName" value=@Model?.SearchName />
+            </div>
+            <div>
+                <label for="searchStartDate">Enrolled Date (From):</label>
+                <input type="date" id="searchStartDate" name="SearchStartDate" value=@Model?.SearchStartDate?.ToString("MM/dd/yyyy",CultureInfo.InvariantCulture) />
+            </div>
+            <div>
+                <label for="searchEndDate">Enrolled Date (To):</label>
+                <input type="date" id="searchEndDate" name="SearchEndDate" value=@Model?.SearchEndDate?.ToString("MM/dd/yyyy",CultureInfo.InvariantCulture) />
+                @Html.ValidationMessageFor(model => model.SearchStartDate)
+            </div>
+            <button type="submit" id="btnSearch" class="btn btn-secondary">Search</button>
+        </form>
     </div>
+    <!--Student table-->
     <div>
-        <label for="searchStartDate">Enrolled Date (From):</label>
-        <input type="date" id="searchStartDate" name="SearchStartDate" value="@Model.SearchStartDate?.ToString("MM/dd/yyyy")" />
-    </div>
-    <div>
-        <label for="searchEndDate">Enrolled Date (To):</label>
-        <input type="date" id="searchEndDate" name="SearchEndDate" value="@Model.SearchEndDate?.ToString("MM/dd/yyyy")" />
-    </div>
-    <button type="submit">Search</button>
-</form>
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Student Id</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Age</th>
-                <th>Enrolled Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var student in Model.Students)
-            {
+        <table class="table table-striped ">
+            <thead>
                 <tr>
-                    <td>@student.Id</td>
-                    <td>@student.FirstName</td>
-                    <td>@student.LastName</td>
-                    <td>@student.Age</td>
-                    <td>@student.EnrolledDate.ToString("MM-dd-yyyy")</td>
+                    <th>Student Id</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Age</th>
+                    <th>Enrolled Date</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="studentTableRow">
+                @if (Model?.Students != null)
+                {
+                    @foreach (var student in Model.Students)
+                    {
+                        <tr>
+                            <td>@student.Id</td>
+                            <td>@student.FirstName</td>
+                            <td>@student.LastName</td>
+                            <td>@student.Age</td>
+                            <td>@student.EnrolledDate.ToString("MM/dd/yyyy",CultureInfo.InvariantCulture)</td>
+                        </tr>
+                    }     
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!--If pages are mores than 1,display the pages-->
+@if (Model?.TotalPages > 1)
+{
+    <div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                @if (Model.CurrentPageIndex > 1)
+                {
+                    <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student",
+                        new { CurrentPageIndex = Model.CurrentPageIndex -1,SearchName =Model.SearchName,SearchStartDate=Model.SearchStartDate,SearchEndDate= Model.SearchEndDate } )">Previous</a>
+                    </li>
+                }
+                @for (int pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                {
+                    if (pageIndex == Model.CurrentPageIndex)
+                    {
+                        <li class="page-item active"><a class="page-link" href="#">@pageIndex</a></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = pageIndex,SearchName =Model.SearchName,SearchStartDate=Model.SearchStartDate,SearchEndDate= Model.SearchEndDate } )">@pageIndex</a></li>
+                    }
+                }
+                @if (Model.CurrentPageIndex < Model.TotalPages)
+                {
+                    <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = Model.CurrentPageIndex +1,SearchName =Model.SearchName,SearchStartDate=Model.SearchStartDate,SearchEndDate= Model.SearchEndDate} )">Next</a></li>
+                }
+            </ul>
+        </nav>
+    </div>
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@*<!--Script to render student search result only by refreshing the student table-->
+<script>
+    $('#dt1').datepicker({
+    format: 'd-M-yyyy'
+})
+</script>*@
 
-<nav aria-label="Page navigation example">
-    <ul class="pagination">
-        @if (Model.CurrentPageIndex > 1)
-        {
-            <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = Model.CurrentPageIndex - 1 })">Previous</a></li>
-        }
-        @for (int pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
-        {
-            if (pageIndex == Model.CurrentPageIndex)
-            {
-                <li class="page-item active"><a class="page-link" href="#">@pageIndex</a></li>
-            }
-            else
-            {
-                <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = pageIndex })">@pageIndex</a></li>
-            }
-        }
-        @if (Model.CurrentPageIndex < Model.TotalPages)
-        {
-            <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = Model.CurrentPageIndex + 1 })">Next</a></li>
-        }
-    </ul>
-</nav>
+
+
+<!--Script to render student search result only by refreshing the student table-->
+<script>
+    $(document).ready(function () {
+        $('#btnSearch').on('click', 'form', function (event) {
+            event.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
+            var formData = form.serialize();
+
+            // Perform AJAX request
+            $.ajax({
+                type: 'Post',
+                url: url,
+                data: formData,
+                contentType: "html",
+                success: function (result) {
+                    console.log(result);
+                    // Handle the successful response, update the student list and pagination
+                    $('#studentTableRow').html(result);
+  
+                },
+                error: function (xhr, status, error) {
+                    // Handle the error
+                    console.log(error);
+                }
+            });
+        });
+    });
+</script>
 
 

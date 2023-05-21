@@ -1,54 +1,16 @@
-﻿@model StudentPortal.ViewModel.StudentViewModel
-@{
+﻿@using System.Globalization;
+@model IEnumerable<Student>
+<!--Student partial view-->
+@if (Model != null)
+{
+    @foreach (var student in Model)
+    {
+        <tr>
+            <td>@student.Id</td>
+            <td>@student.FirstName</td>
+            <td>@student.LastName</td>
+            <td>@student.Age</td>
+            <td>@student.EnrolledDate.ToString("MM/dd/yyyy",CultureInfo.InvariantCulture)</td>
+        </tr>
+    }
 }
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Student Id</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Age</th>
-                <th>Enrolled Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var student in Model.Students)
-            {
-                <tr>
-                    <td>@student.Id</td>
-                    <td>@student.FirstName</td>
-                    <td>@student.LastName</td>
-                    <td>@student.Age</td>
-                    <td>@student.EnrolledDate.ToString("MM-dd-yyyy")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<!--If pages are mores than 1,display the pages-->
-
-<nav aria-label="Page navigation example">
-    <ul class="pagination">
-        @if (Model.CurrentPageIndex > 1)
-        {
-            <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = Model.CurrentPageIndex - 1 })">Previous</a></li>
-        }
-        @for (int pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
-        {
-            if (pageIndex == Model.CurrentPageIndex)
-            {
-                <li class="page-item active"><a class="page-link" href="#">@pageIndex</a></li>
-            }
-            else
-            {
-                <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = pageIndex })">@pageIndex</a></li>
-            }
-        }
-        @if (Model.CurrentPageIndex < Model.TotalPages)
-        {
-            <li class="page-item"><a class="page-link" href="@Url.Action("Students", "Student", new { CurrentPageIndex = Model.CurrentPageIndex + 1 })">Next</a></li>
-        }
-    </ul>
-</nav>
